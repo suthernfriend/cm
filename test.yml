@@ -1,0 +1,13 @@
+version: 1
+kill-delay: 5000
+apps:
+  wikipedia:
+    context: /
+    exec: ping -c 3 wikipedia.org
+    fail-on-exit: true
+    term-signal: SIGTERM
+  google:
+    context: /
+    exec: ping -c 5 google.com
+    term-signal: SIGTERM
+
