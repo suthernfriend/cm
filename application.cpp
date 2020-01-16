@@ -1,8 +1,8 @@
 #include "application.h"
 #include "constants.h"
 
-cm::application::application(cm::config_map map)
-        : map(std::move(map)), kill_timer(ios), signal_set(ios), completed_apps(0) {
+cm::application::application(cm::config_map map, std::shared_ptr<cm::logger> log)
+        : map(std::move(map)), kill_timer(ios), signal_set(ios), completed_apps(0), log(log) {
     setup_signal_set();
 }
 
@@ -19,30 +19,24 @@ void cm::application::kill_timeout_handler(const boost::system::error_code &ec) 
         if (it.second->terminated())
             continue;
 
-        log("Forcibly terminating app " + it.first);
+        log->err(app_name, "Forcibly terminating app " + it.first);
         it.second->kill();
     }
 }
 
-void cm::application::log(const std::string &app, std::ostream &out, const std::string &line) {
-    out << "[" << app << "] " << line << "\n";
-}
-
 void cm::application::all_down_handler() {
-    log("Shutdown complete");
+    log->err(app_name, "Shutdown complete");
     signal_set.cancel();
     kill_timer.cancel();
 }
 
 void cm::application::shutdown_handler() {
 
-    completed_apps++;
-
-    log("Shutdown: total children: " + std::to_string(map.apps.size()) + ", completed: " +
-        std::to_string(completed_apps.load()));
+    log->err(app_name, "Shutdown: total children: " + std::to_string(map.apps.size()) + ", completed: " +
+                       std::to_string(completed_apps.load()));
 
     if (completed_apps.load() == map.apps.size()) {
-        log("All completed");
+        log->err(app_name, "All completed");
         all_down_handler();
         return;
     }
@@ -52,13 +46,13 @@ void cm::application::shutdown_handler() {
 
     shutdown_running = true;
 
-    log("Shutdown initiated");
+    log->err(app_name, "Shutdown initiated");
 
     for (auto &it : children) {
         if (it.second->terminated())
             continue;
 
-        log("Terminating app " + it.first);
+        log->err(app_name, "Terminating app " + it.first);
         it.second->terminate();
     }
 
@@ -71,7 +65,7 @@ void cm::application::signal_handler(const boost::system::error_code &ec, int si
 
     auto ss = find_if(signals.begin(), signals.end(), [&](auto &s) { return s.first == signal_number; });
 
-    log("Handling signal with number " + std::to_string(signal_number) + " (" + (*ss).second + ")");
+    log->err(app_name, "Handling signal with number " + std::to_string(signal_number) + " (" + (*ss).second + ")");
 
     switch (signal_number) {
         case SIGINT:
@@ -83,19 +77,20 @@ void cm::application::signal_handler(const boost::system::error_code &ec, int si
             break;
     }
 
-    set_signal_handler();
+    if (!shutdown_running)
+        set_signal_handler();
 }
 
 void cm::application::set_signal_handler() {
 
-    log("Setting signal handler");
+    log->err(app_name, "Setting signal handler");
 
     signal_set.async_wait([this](auto &ec, int signo) { signal_handler(ec, signo); });
 }
 
 void cm::application::setup_children() {
 
-    log("Starting applications");
+    log->err(app_name, "Starting applications");
 
     for (const config_map::configured_application &app : map.apps) {
 
@@ -106,19 +101,20 @@ void cm::application::setup_children() {
         );
 
         a->set_on_stdout([this, &app](const child::stream_content_type &buf) {
-            linebuffer.available(app.name + "_out", buf, [app](const std::string &line) {
-                log(app.name, std::cout, line);
+            linebuffer.available(app.name + "_out", buf, [this, app](const std::string &line) {
+                log->out(app.name, line);
             });
         });
 
         a->set_on_stderr([this, &app](const child::stream_content_type &buf) {
-            linebuffer.available(app.name + "_err", buf, [app](const std::string &line) {
-                log(app.name, std::cerr, line);
+            linebuffer.available(app.name + "_err", buf, [this, app](const std::string &line) {
+                log->err(app.name, line);
             });
         });
 
         a->set_on_exit([this, &app](const int exit_code, const std::error_code &code) {
-            log("Application " + app.name + " exited with code " + std::to_string(exit_code) + ".");
+            log->err(app_name, "Application " + app.name + " exited with code " + std::to_string(exit_code) + ".");
+            completed_apps++;
             if (app.fail_on_exit) {
                 shutdown_handler();
             } else {
@@ -136,22 +132,14 @@ void cm::application::setup_children() {
 
 void cm::application::setup_signal_set() {
 
-    log("Setting signal handlers");
+    log->err(app_name, "Setting signal handlers");
     for (const auto &signal : signals) {
         try {
             signal_set.add(signal.first);
         } catch (const std::runtime_error &e) {
             std::cout << signal.first << signal.second << e.what() << "\n";
-            log(app_name, std::cerr, e.what());
+            log->err(app_name, e.what());
             return;
         }
     }
-}
-
-void cm::application::log(const std::string &app, const std::string &line) {
-    log(app_name, std::cout, line);
-}
-
-void cm::application::log(const std::string &line) {
-    log(app_name, line);
 }

@@ -3,11 +3,11 @@ kill-delay: 5000
 apps:
   wikipedia:
     context: /
-    exec: ping -c 3 wikipedia.org
+    exec: ping -c 999 wikipedia.org
     fail-on-exit: true
     term-signal: SIGTERM
   google:
     context: /
-    exec: ping -c 5 google.com
+    exec: ping -c 60 google.com
     term-signal: SIGTERM
 

@@ -3,6 +3,7 @@
 
 #include <boost/process.hpp>
 #include <boost/asio.hpp>
+#include "logger.h"
 #include "child.h"
 #include "config_map.h"
 
@@ -11,12 +12,13 @@ namespace cm {
     class application {
 
     public:
-        explicit application(config_map map);
+        explicit application(config_map map, std::shared_ptr<logger> log);
 
         void run();
 
     private:
 
+        std::shared_ptr<logger> log;
         config_map map;
         boost::process::group proc_group;
         boost::asio::io_service ios;
@@ -30,10 +32,6 @@ namespace cm {
         bool shutdown_running = false;
 
         void kill_timeout_handler(const boost::system::error_code &ec);;
-
-        static void log(const std::string &app, std::ostream &out, const std::string& line);
-        static void log(const std::string &app, const std::string& line);
-        static void log(const std::string& line);
 
         void all_down_handler();
 

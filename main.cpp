@@ -39,8 +39,15 @@ int main(int argc, char *argv[]) {
     }
 
     try {
+        std::shared_ptr<cm::logger> log;
+
+        if (use_json)
+            log = std::make_shared<cm::json_logger>(std::cout);
+        else
+            log = std::make_shared<cm::simple_logger>();
+
         cm::config_map config(config_file);
-        cm::application app(config);
+        cm::application app(config, log);
 
         app.run();
         return 0;
