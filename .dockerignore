@@ -1,0 +1,6 @@
+.git/
+build/
+cmake-build-*/
+README.md
+*.yml
+*.yaml
