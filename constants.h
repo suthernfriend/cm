@@ -42,7 +42,9 @@ namespace cm {
             {SIGWINCH,  "SIGWINCH"},
             {SIGIO,     "SIGIO"},
             {SIGIOT,    "SIGIOT"},
+#ifdef SIGCLD
             {SIGCLD,    "SIGCLD"},
+#endif
     };
 
     inline int signal_string_to_int(const std::string &signal_str) {
