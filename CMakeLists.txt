@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(Boost_USE_STATIC_LIBS on)
 
 find_package(yaml-cpp REQUIRED)
-find_package(Boost 1.71 REQUIRED filesystem date_time)
+find_package(Boost 1.69 REQUIRED filesystem date_time)
 find_library(YAML_CPP_STATIC_LIB libyaml-cpp.a)
 
 include_directories(
