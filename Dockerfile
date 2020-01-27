@@ -1,16 +1,15 @@
 FROM alpine:latest AS build
 
-ARG YAML_CPP_VERSION="0.6.2"
+ARG YAML_CPP_VERSION="0.6.3"
 
 RUN apk --update upgrade && \
-        apk add git cmake g++ make yaml-cpp-dev boost-dev boost-static && \
-    wget "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-$YAML_CPP_VERSION.tar.gz" -O /tmp/yaml-cpp.tar.gz && \
-    cd /tmp && tar xf ./yaml-cpp.tar.gz && \
-    cd ./yaml-cpp-yaml-cpp-$YAML_CPP_VERSION && \
+        apk add git cmake g++ make boost-dev boost-static && \
+        wget "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-$YAML_CPP_VERSION.tar.gz" -O /tmp/yaml-cpp.tar.gz && \
+        cd /tmp && tar xf ./yaml-cpp.tar.gz && \
+        cd ./yaml-cpp-yaml-cpp-$YAML_CPP_VERSION && \
         mkdir -p ./build && \
         cd build && cmake .. -DCMAKE_BUILD_TYPE=Release && \
-        make -j 4 && \
-        install -Dm644 libyaml-cpp.a /usr/lib/libyaml-cpp.a
+        make -j 4 && make install
 
 COPY . /tmp/cm
 

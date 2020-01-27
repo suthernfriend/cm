@@ -12,7 +12,7 @@ find_library(YAML_CPP_STATIC_LIB libyaml-cpp.a)
 include_directories(
         ${Boost_INCLUDE_DIR}
         ${YAML_CPP_INCLUDE_DIR}
-        )
+)
 
 add_executable(${EXECUTABLE_NAME} main.cpp application.cpp application.h line_buffer.h child.cpp child.h config_map.cpp config_map.h constants.h logger.cpp logger.h)
 
