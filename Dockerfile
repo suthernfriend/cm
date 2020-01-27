@@ -16,7 +16,8 @@ COPY . /tmp/cm
 RUN cd /tmp/cm && \
         cmake -B build && \
         cd build && \
-        make -j 2
+        make -j 2 && \
+        strip ./cm
 
 FROM alpine:latest
 
