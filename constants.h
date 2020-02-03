@@ -8,7 +8,7 @@
 
 namespace cm {
     const std::string app_name = "cm";
-    const std::string app_version = "1.0.1";
+    const std::string app_version = "1.1.0";
     const std::vector<std::pair<int, std::string>> signals = {
 
             {SIGINT,    "SIGINT"},

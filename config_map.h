@@ -6,6 +6,7 @@
 #include <csignal>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <yaml-cpp/yaml.h>
+#include <boost/process.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -36,14 +37,18 @@ namespace cm {
         std::vector<configured_application> apps;
         boost::posix_time::milliseconds kill_delay;
 
-        explicit config_map(const std::string &file);
+        static std::shared_ptr<config_map> from_file(const std::string &file);
+        static std::shared_ptr<config_map> from_environment();
+
+        explicit config_map(int kill_delay);
 
     private:
+
         static configured_application parse_v1_app(const std::string &name, const YAML::Node &node);
 
-        void parse_v1();
+        static YAML::Node env_to_yaml_v1(const boost::process::environment &env);
 
-        YAML::Node config;
+        void parse_v1(const YAML::Node &config);
     };
 }
 

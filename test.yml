@@ -10,4 +10,7 @@ apps:
     context: /
     exec: ping -c 60 google.com
     term-signal: SIGTERM
-
+  proxy:
+    context: /etc/nginx
+    exec: nginx -g "daemon off;" -c /app/docker/nginx.conf
+    term-signal: SIGTERM

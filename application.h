@@ -12,14 +12,14 @@ namespace cm {
     class application {
 
     public:
-        explicit application(config_map map, std::shared_ptr<logger> log);
+        explicit application(std::shared_ptr<config_map> map, std::shared_ptr<logger> log);
 
         void run();
 
     private:
 
         std::shared_ptr<logger> log;
-        config_map map;
+        std::shared_ptr<config_map> map;
         boost::process::group proc_group;
         boost::asio::io_service ios;
         std::map<std::string, std::unique_ptr<child>> children;
@@ -28,8 +28,7 @@ namespace cm {
         boost::asio::signal_set signal_set;
         int total_apps;
         std::atomic_int completed_apps;
-
-        bool shutdown_running = false;
+        std::atomic_bool shutdown_running;
 
         void kill_timeout_handler(const boost::system::error_code &ec);;
 
