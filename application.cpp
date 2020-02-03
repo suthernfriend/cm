@@ -66,7 +66,10 @@ void cm::application::signal_handler(const boost::system::error_code &ec, int si
 
     auto ss = find_if(signals.begin(), signals.end(), [&](auto &s) { return s.first == signal_number; });
 
-    log->err(app_name, "Handling signal with number " + std::to_string(signal_number) + " (" + (*ss).second + ")");
+    if (ss == signals.end())
+        log->err(app_name, "Handling signal with number " + std::to_string(signal_number) + " (unknown)");
+    else
+        log->err(app_name, "Handling signal with number " + std::to_string(signal_number) + " (" + (*ss).second + ")");
 
     switch (signal_number) {
         case SIGINT:
@@ -97,8 +100,15 @@ void cm::application::setup_children() {
 
         try {
 
+            boost::filesystem::path path;
+
+            if (boost::filesystem::exists(app.executable))
+                path = app.executable;
+            else
+                path = bp::search_path(app.executable);
+
             std::unique_ptr<child> a = std::make_unique<child>(
-                    app.name, bp::search_path(app.executable), app.args,
+                    app.name, path, app.args,
                     boost::filesystem::canonical(app.context), app.env, app.term_signal,
                     ios, proc_group
             );

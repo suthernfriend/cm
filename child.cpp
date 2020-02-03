@@ -15,7 +15,9 @@ cm::child::child(std::string name, const fs::path &executable, const std::vector
     for (const auto &it : env)
         boost_env[it.first] = it.second;
 
-    child_process = bp::child(bp::exe = executable, bp::args = args, bp::start_dir = context,
+    // WORKAROUND: executable.native() is used cause debian#libboost1.67-dev somehow
+    // patched out the assignment operators for fs::path to bp::exe
+    child_process = bp::child(bp::exe = executable.native(), bp::args = args, bp::start_dir = context,
                               bp::env = bp::environment(boost_env),
                               ios, group,
                               bp::std_in < in_pipe, bp::std_out > out_pipe, bp::std_err > err_pipe,

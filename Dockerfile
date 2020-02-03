@@ -24,4 +24,5 @@ FROM alpine:latest
 COPY --from=build /tmp/cm/build/cm /usr/bin/cm
 
 ENTRYPOINT [ "/usr/bin/cm" ]
-CMD [ "-j", "/etc/cm.yaml" ]
+
+CMD [ "-j", "-e" ]

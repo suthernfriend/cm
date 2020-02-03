@@ -52,7 +52,7 @@ cm::config_map::configured_application cm::config_map::parse_v1_app(const std::s
     }
 
     if (!node["context"])
-        throw config_map_exception("app " + name + " requires context");
+        n.context = "/";
     else if (!node["context"].IsScalar())
         throw config_map_exception("app " + name + " context needs to be scalar");
     else
@@ -182,8 +182,6 @@ YAML::Node cm::config_map::env_to_yaml_v1(const boost::process::environment &env
             }
         }
     }
-
-    std::cout << root << std::endl;
 
     return root;
 }

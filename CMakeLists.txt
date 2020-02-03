@@ -4,6 +4,7 @@ project(cm)
 set(EXECUTABLE_NAME cm)
 set(CMAKE_CXX_STANDARD 17)
 set(Boost_USE_STATIC_LIBS on)
+set(BUILD_SHARED_LIBS off)
 
 find_package(yaml-cpp REQUIRED)
 find_package(Boost 1.67 REQUIRED filesystem date_time)
@@ -20,5 +21,5 @@ target_link_libraries(${EXECUTABLE_NAME}
         ${YAML_CPP_STATIC_LIB}
         ${Boost_LIBRARIES}
         pthread
-        "-static"
+        -static
         )
